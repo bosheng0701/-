@@ -11,7 +11,8 @@ def index():
     pwd =request.values['password']
     
     db= pymysql.connect("127.0.0.1","root1","password","root1")
-  
+    if(ID.isupper):
+        ID=ID.lower()
     cursor=db.cursor()
     cursor.execute("SELECT id,password FROM `user` WHERE id='%s' and password='%s'"%(ID,pwd))
     data =cursor.fetchone()
