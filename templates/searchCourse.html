@@ -38,9 +38,19 @@
 				var login = '{{login_message}}'
 				if(login==1){
 					alert("Login Success!");
+					login++;
 					$('#person_data #s_id').html('{{student[0]}}')
 					$('#person_data #name').html('{{student[1]}}')
 					$('#person_data #s_cla').html('{{student[4]}}')
+					$("#person_data #sign_out").html("登出")
+					$("#person_data").show();
+				}
+				if(login>1)
+				{
+					$('#person_data #s_id').html('{{student[0]}}')
+					$('#person_data #name').html('{{student[1]}}')
+					$('#person_data #s_cla').html('{{student[4]}}')
+					$("#person_data #sign_out").html("登出")
 					$("#person_data").show();
 				}
 		})

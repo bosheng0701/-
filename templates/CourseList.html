@@ -32,6 +32,21 @@
 		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 	<![endif]-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+		$(document).ready(function (){
+				$("#person_data").hide();
+				var login = '{{login_message}}'
+				if(login>=1){
+					
+					$('#person_data #s_id').html('{{student}}')
+					$('#person_data #name').html('{{name}}')
+					$('#person_data #s_cla').html('{{class}}')
+					$("#person_data #sign_out").html("登出")
+					$("#person_data").show();
+				}
+		})
+		// 登錄成功後會從flask接收到loginmessage=1 的訊息，出現彈出視窗
+	</script>
 </head>
 
 <body>
@@ -42,7 +57,7 @@
 
     <!-- Header Section -->
     <header class="header-section">
-        <a href="index.html" class="site-logo">
+        <a href="index" class="site-logo">
             <img src="static/img/logo.png" alt="">
         </a>
         <nav class="header-nav">
@@ -50,6 +65,14 @@
                 <li><a href="index">主頁</a></li>
                 <li><a href="searchCourse" class="active">課程檢索</a></li>
                 <li><a href="schedule">schedule</a></li>
+                <li id="person_data"><a href="#">個人資料</a>
+					<ul class="sub-menu">
+						<li><a id="s_id"></a></li>
+						<li><a id="name"></a></li>
+                        <li><a id="s_cla"></a></li>
+                        <li><a id="sign_out" href="index"></a></li>
+					</ul>
+				</li>
             </ul>
         </nav>
     </header>
@@ -68,26 +91,49 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <!-- 選課按鈕的欄位 -->
+                       
+                        <th>課程代碼</th>
+                        <th>課程名稱</th>
+                        <th>必選修</th>
+						<th>學分數</th>
+						<th>授課老師</th>
+						<th>選課人數</th>
+						<th>收授人數</th>
+						<th>開課班級</th>
+						<th>星期</th>
+						<th>開始時間</th>
+						<th>結束時間</th>
+
+						 <!-- 選課按鈕的欄位 -->
                         <th width="5%"></th>
                         <!-- 下方欄位自行更改 -->
-                        <th>bookname</th>
-                        <th>author</th>
-                        <th>price</th>
+						<th width="5%"></th>
                     </tr>
                 </thead>
                 <tbody>
                     <!-- books為flask 傳過來的參數 -->
                     {% for book in books %}  
-                    <tr>
-                        <!-- 選課按鈕 -->
-                        <td><input type="button" value="choose" class="btn btn-primary"></td>
+					<form method="get"  class="form-horizontal" role="form">
+						<tr>
+                       
+                        <td>{{book[0]}}</td> 
+                        <td>{{book[1]}}</td>
+                        <td>{{book[2]}}</td>
+						<td>{{book[3]}}</td>
+						<td>{{book[4]}}</td>
+						<td>{{book[5]}}</td>
+						<td>{{book[6]}}</td>
+						<td>{{book[7]}}</td>
+						<td>{{book[8]}}</td>
+						<td>{{book[9]}}</td>
+						<td>{{book[10]}}</td>
+                         <!-- 選課按鈕 -->
+                        <td><button onclick="window.location='{{url_for('add',C_id=book[0],C_name=book[1],C_MorO=book[2],C_credits=book[3],C_choose=book[5],C_rec=book[6],C_class=book[7],C_week=book[8],C_start=book[9],C_end=book[10])}}';" type="button" value="{{book[0]}}" class="btn btn-primary">加選</td>
+						<td><button onclick="window.location='{{url_for('pop',C_id=book[0],C_name=book[1],C_MorO=book[2],C_credits=book[3],C_choose=book[5],C_rec=book[6],C_class=book[7],C_week=book[8],C_start=book[9],C_end=book[10])}}';" type="button" value="{{book[0]}}" class="btn btn-primary">退選</td>
+						
                         <!-- for 迴圈印出book裡面所含的資料 -->
-                        <td>{{book.name}}</td> 
-                        <td>{{book.author}}</td>
-                        <td>{{book.price}}</td>
-                        
-                    </tr>
+						</tr>
+					</form>
                     {% endfor %}
                 </tbody>
             </table>
