@@ -17,7 +17,7 @@ app.config['SESSION_TYPE'] = 'filesystem'
 app.config['PERMANENT_SESSION_LIFETIME'] = 7200
 app.config['SESSION_FILE_THRESHOLD'] = 100  
 app.config['SECRET_KEY'] = "bobb0711"
-Session(app)
+
 db= pymysql.connect("140.134.53.65","admin","admin123456","db_project")
 cursor=db.cursor()
 
@@ -77,41 +77,49 @@ def add():
     cursor.execute("SELECT *,if(COUNT(section)>1,section+COUNT(section)-1,section) AS endsection FROM timetable"
                    " NATURAL LEFT JOIN coursetime GROUP BY s_id,c_id,day HAVING s_id=\"%s\""%(student))
     data=cursor.fetchall()
+
+    cursor.execute("SELECT *,if(COUNT(section)>1,section+COUNT(section)-1,section) AS endsection FROM course NATURAL JOIN coursetime GROUP BY c_id,day HAVING course.c_id ='%s'"%(course[0]))
+    coursetime=cursor.fetchall()
+
+    for i in coursetime:#判斷衝堂
+        for j in data:
+            if(i[8]==j[5] and int(i[9])>=int(j[6]) and int(i[10])<=int(j[7])):
+                return "衝堂"
     
-    
+   
     credit=int(0)
-    for i in data:
-        
-        if(course[7]==i[5] and int(course[8])>=int(i[6]) and int(course[9])<=int(i[7])):
-            return "衝堂"
+    for i in data:#判斷重複選課and課程人數
         if(course[1]==i[2]):
             return "不可重複選課"
         if(int(course[4])>=int(course[5])):
             return "課程人數已滿"
-        if(i[3]!=data[i[3]]):
-            print(data.find(i[3]))
-            credit=credit+int(i[3])
-       
+        
+    cursor.execute("SELECT * FROM `timetable` WHERE `s_id`='%s'"%(student)) # 判斷學分是否超過30學分
+    timetable=cursor.fetchall()
+    for j in timetable:
+        credit+=int(j[3])
+        
     if(credit+int(course[3])>=30):
         return "超過30學分"
-    cursor.execute("INSERT INTO timetable(s_id,c_id,c_name,credits,queue) VALUES ('%s','%s','%s','%d',0);"%(student,course[0],course[1],int(course[3])))
+    
+    cursor.execute("INSERT INTO timetable(s_id,c_id,c_name,credits,queue) VALUES ('%s','%s','%s','%d',0);"%(student,course[0],course[1],int(course[3])))#加選
     db.commit()
+    
     return "加選成功"
 
 @app.route('/pop')
 def pop():
     student=session.get('username')
     course=list(request.args.values())
-    cursor.execute("SELECT *,if(COUNT(section)>1,section+COUNT(section)-1,section) AS endsection FROM timetable"
-                   " NATURAL LEFT JOIN coursetime GROUP BY s_id,c_id,day HAVING s_id=\"%s\""%(student))
     credit=int(0)
-    data=cursor.fetchall()
-    print(data)
-    for i in data:
-        credit=credit+int(i[3])
-        print(credit)
+    cursor.execute("SELECT * FROM `timetable` WHERE `s_id`='%s'"%(student)) # 判斷學分是否低於12學分
+    timetable=cursor.fetchall()
+    for j in timetable:
+        credit+=int(j[3])
+        
     if(credit-int(course[3])<12):
         return "低於12學分"
+    
     cursor.execute("DELETE FROM timetable WHERE s_id='%s' and c_id='%s';"%(student,course[0]))
     db.commit()
     return "退選成功"
